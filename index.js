@@ -29,6 +29,20 @@ server.get('/api/posts/:id', (req, res) => {
         })
 })
 
+server.post('/api/posts', (req, res) => {
+    const newPost = req.body;
+    db.insert(newPost)
+    .then(data => {
+        if(newPost.title && newPost.contents){
+            res.status(201).json({ success: 'true', newPost })
+        } else {
+            res.status(400).json({ errorMessage: "Please provide title and contents for the post." })
+        }
+    })
+    .catch(error => {
+        res.status(500).json({ error: "There was an error while saving the post to the database" })
+    })
+})
 
 
 server.listen(4001, () => {
