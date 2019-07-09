@@ -61,6 +61,22 @@ server.post('/api/posts', (req, res) => {
     })
 })
 
+server.post('/api/posts/:id/comments', async (req, res) => {
+    const commentsInfo = { ...req.body, post_id: req.params.id };
+   try {
+       const comment = await db.insertComment(commentsInfo);
+       const id = await db.findPostComments(commentsInfo);
+       if(id){
+        res.status(201).json(comment);
+       } else {
+           res.status(404).json({ message: "The post with the specified ID does not exist." })
+       }
+       
+   } catch (error) {
+        res.status(500).json({ error: "There was an error while saving the comment to the database" })
+   }
+})
+
 server.delete('/api/posts/:id', (req, res) => {
     const postId = req.params.id;
     db.remove(postId)
