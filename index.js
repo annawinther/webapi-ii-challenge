@@ -30,11 +30,11 @@ server.get('/api/posts/:id', (req, res) => {
 })
 
 server.post('/api/posts', (req, res) => {
-    const newPost = req.body;
-    db.insert(newPost)
+    const postData = req.body;
+    db.insert(postData)
     .then(data => {
-        if(newPost.title && newPost.contents){
-            res.status(201).json({ success: 'true', newPost })
+        if(postData.title && postData.contents){
+            res.status(201).json({ success: 'true', postData })
         } else {
             res.status(400).json({ errorMessage: "Please provide title and contents for the post." })
         }
@@ -59,7 +59,28 @@ server.delete('/api/posts/:id', (req, res) => {
         })
 })
 
-
+server.put('/api/posts/:id', (req, res) => {
+    const postId = req.params.id;
+    const postData = req.body;
+    if(postData && postData.title && postData.contents){
+        db.update(postId, postData)
+            .then(data => {
+                if(data){
+                   return db.findById(postId)
+                } else {
+                    res.status(404).json({ message: "The post with the specified ID does not exist." })
+                }
+            })
+            .then(data => {
+                res.status(200).json(postData)
+            })
+            .catch(error => {
+                res.status(400).json({ errorMessage: "Please provide title and contents for the post." })
+            })
+    } else {
+        res.status(500).json({ error: "The post information could not be modified." })
+    }
+})
 
 
 server.listen(4001, () => {
