@@ -61,21 +61,49 @@ server.post('/api/posts', (req, res) => {
     })
 })
 
-server.post('/api/posts/:id/comments', async (req, res) => {
-    const commentsInfo = { ...req.body, post_id: req.params.id };
-   try {
-       const comment = await db.insertComment(commentsInfo);
-       const id = await db.findPostComments(commentsInfo);
-       if(id){
-        res.status(201).json(comment);
-       } else {
-           res.status(404).json({ message: "The post with the specified ID does not exist." })
-       }
-       
-   } catch (error) {
-        res.status(500).json({ error: "There was an error while saving the comment to the database" })
-   }
-})
+server.post("/api/posts/:id/comments", async (req, res) => {
+    const { id } = req.params;
+    const { text } = req.body;
+    try {
+      const hub = await db.findById(id);
+      if (!hub) {
+        return res.status(404).json({
+          message: "Hub does not exist"
+        });
+      }
+  
+      if (!text) {
+        res.status(400).json({
+          message: "Text is required"
+        });
+      } else {
+        const postCom = await db.insertComment({
+          post_id: id,
+          text,
+        });
+        res.status(201).json(postCom);
+      }
+    } catch (err) {
+      res.status(500).json({
+        message: err.toString()
+      });
+    }
+  });
+// server.post('/api/posts/:id/comments',  (req, res) => {
+//     const postId = req.params.id;
+//     const postData = req.body;
+// if(postData && postData.text && postData.post_id)
+//     .then{
+//         if(comment){
+//             res.status(201).json(comment);
+//         } else {
+//             res.status(404).json({ message: "The post with the specified ID does not exist." })
+//         }
+        
+//     } .catch (error) {
+//             res.status(500).json({ error: "There was an error while saving the comment to the database" })
+//     }
+// })
 
 server.delete('/api/posts/:id', (req, res) => {
     const postId = req.params.id;
